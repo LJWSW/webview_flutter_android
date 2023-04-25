@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import java.io.File;
@@ -140,7 +141,7 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
         mUploadMessageArray.onReceiveValue(null);
       }
       Activity activity =  (Activity)webView.getContext();
-      if (askPermission(activity)) {
+      if (requestCameraPermission(activity) && requestStoragePermission(activity)) {
         ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA
@@ -213,10 +214,22 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
       flutterApi = null;
     }
 
-    private boolean askPermission(Activity activity) {
-      return ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)|
-              ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE)|
-              ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
+//    private boolean askPermission(Activity activity) {
+//      return ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)|
+//              ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.READ_EXTERNAL_STORAGE)|
+//              ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.CAMERA);
+//    }
+
+    private boolean requestStoragePermission(Activity activity) {
+      int hasCameraPermission = ContextCompat.checkSelfPermission(activity,
+              Manifest.permission_group.STORAGE);
+      return hasCameraPermission == 0;
+    }
+
+    private boolean requestCameraPermission(Activity activity) {
+      int hasCameraPermission = ContextCompat.checkSelfPermission(activity,
+              Manifest.permission_group.CAMERA);
+       return hasCameraPermission == 0;
     }
 
   }
