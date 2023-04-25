@@ -139,6 +139,14 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
       if (mUploadMessageArray != null) {
         mUploadMessageArray.onReceiveValue(null);
       }
+      Activity activity =  (Activity)webView.getContext();
+      if (askPermission(activity)) {
+        ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+        },0);
+        return;
+      }
       mUploadMessageArray = filePathCallback;
 
       final String[] acceptTypes = getSafeAcceptedTypes(fileChooserParams);
@@ -146,19 +154,10 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
       fileUri = null;
       videoUri = null;
       if (acceptsImages(acceptTypes)) {
-        Activity activity =  (Activity)webView.getContext();
-        if (!askPermission(activity)) {
           Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
           fileUri = getOutputFilename(MediaStore.ACTION_IMAGE_CAPTURE);
           takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
           intentList.add(takePhotoIntent);
-        }else {
-          ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                  Manifest.permission.READ_EXTERNAL_STORAGE,
-                  Manifest.permission.CAMERA
-          },0);
-        }
-
       }
       if (acceptsVideo(acceptTypes)) {
         Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
