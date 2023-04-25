@@ -145,7 +145,7 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA
         },0);
-        return;
+        return false;
       }
       mUploadMessageArray = filePathCallback;
 
