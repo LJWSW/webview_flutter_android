@@ -141,7 +141,7 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
         mUploadMessageArray.onReceiveValue(null);
       }
       Activity activity =  (Activity)webView.getContext();
-      if (requestCameraPermission(activity) && requestStoragePermission(activity)) {
+      if (requestCameraPermission(activity) || requestStoragePermission(activity)) {
         ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.CAMERA
@@ -223,13 +223,13 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
     private boolean requestStoragePermission(Activity activity) {
       int hasCameraPermission = ContextCompat.checkSelfPermission(activity,
               Manifest.permission_group.STORAGE);
-      return hasCameraPermission == 0;
+      return hasCameraPermission != 0;
     }
 
     private boolean requestCameraPermission(Activity activity) {
       int hasCameraPermission = ContextCompat.checkSelfPermission(activity,
               Manifest.permission_group.CAMERA);
-       return hasCameraPermission == 0;
+       return hasCameraPermission != 0;
     }
 
   }
