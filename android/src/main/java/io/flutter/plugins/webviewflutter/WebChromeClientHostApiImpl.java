@@ -11,6 +11,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -26,6 +27,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -230,9 +233,15 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
           return false;
         }
       } else {
+        boolean should = ActivityCompat.shouldShowRequestPermissionRationale(activity,Manifest.permission.READ_EXTERNAL_STORAGE);
         int hasStoragePermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
         if (hasStoragePermission != 0) {
-          ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+          if (should) {
+            Toast.makeText(activity,"请允许存储权限",Toast.LENGTH_SHORT).show();
+            openSystemSetting(activity);
+          }else {
+            ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+          }
           return false;
         }else {
           return true;
@@ -241,13 +250,26 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
     }
 
     private boolean requestCameraPermission(Activity activity) {
+      boolean should = ActivityCompat.shouldShowRequestPermissionRationale(activity,Manifest.permission.CAMERA);
       int hasCameraPermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
       if (hasCameraPermission != 0) {
-        ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.CAMERA},0);
+        if (should) {
+          Toast.makeText(activity,"请允许相机权限",Toast.LENGTH_SHORT).show();
+          openSystemSetting(activity);
+        }else {
+          ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.CAMERA},0);
+        }
         return false;
       }else {
         return true;
       }
+    }
+
+    private void openSystemSetting(Context context) {
+      Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+      Uri uri = Uri.fromParts("package", context.getPackageName(), null);
+      intent.setData(uri);
+      context.startActivity(intent);
     }
 
   }
