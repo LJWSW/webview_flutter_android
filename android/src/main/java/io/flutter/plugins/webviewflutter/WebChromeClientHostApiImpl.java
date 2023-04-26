@@ -14,9 +14,11 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.provider.Settings;
 import android.util.Log;
 import android.webkit.GeolocationPermissions;
 import android.webkit.ValueCallback;
@@ -141,11 +143,7 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
         mUploadMessageArray.onReceiveValue(null);
       }
       Activity activity =  (Activity)webView.getContext();
-      if (requestCameraPermission(activity) || requestStoragePermission(activity)) {
-        ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-        },0);
+      if (!requestCameraPermission(activity) || !requestStoragePermission(activity)) {
         return false;
       }
       mUploadMessageArray = filePathCallback;
@@ -221,15 +219,35 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
 //    }
 
     private boolean requestStoragePermission(Activity activity) {
-      int hasCameraPermission = ContextCompat.checkSelfPermission(activity,
-              Manifest.permission_group.STORAGE);
-      return hasCameraPermission != 0;
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // 先判断有没有权限
+        if (Environment.isExternalStorageManager()) {
+          return true;
+        } else {
+          Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+          intent.setData(Uri.parse("package:" + activity.getPackageName()));
+          activity.startActivityForResult(intent, 1);
+          return false;
+        }
+      } else {
+        int hasStoragePermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (hasStoragePermission != 0) {
+          ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+          return false;
+        }else {
+          return true;
+        }
+      }
     }
 
     private boolean requestCameraPermission(Activity activity) {
-      int hasCameraPermission = ContextCompat.checkSelfPermission(activity,
-              Manifest.permission_group.CAMERA);
-       return hasCameraPermission != 0;
+      int hasCameraPermission = ContextCompat.checkSelfPermission(activity, Manifest.permission.CAMERA);
+      if (hasCameraPermission != 0) {
+        ActivityCompat.requestPermissions(activity,new String[]{Manifest.permission.CAMERA},0);
+        return false;
+      }else {
+        return true;
+      }
     }
 
   }
