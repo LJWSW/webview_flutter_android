@@ -229,7 +229,12 @@ public class WebChromeClientHostApiImpl implements WebChromeClientHostApi {
         } else {
           Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
           intent.setData(Uri.parse("package:" + activity.getPackageName()));
-          activity.startActivityForResult(intent, 1);
+          try {
+            activity.startActivity(intent);
+          }catch (Exception e) {
+            Intent allFileIntent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            activity.startActivity(allFileIntent);
+          }
           return false;
         }
       } else {
